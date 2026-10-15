@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Thai CCTV Live</string>
+    <string name="app_subtitle">ระบบกล้องวงจรปิดเรียลไทม์ เกาะสมุย</string>
+    <string name="tab_map">แผนที่กล้อง</string>
+    <string name="tab_live">สตรีมสด</string>
+    <string name="tab_ai_guide">Google Maps AI</string>
+    <string name="live_badge">LIVE สด</string>
+    <string name="online_status">ออนไลน์ 24 ชม.</string>
+    <string name="fullscreen_btn">เต็มจอ</string>
+    <string name="switch_camera">สลับกล้อง</string>
+</resources>

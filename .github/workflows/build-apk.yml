@@ -1,0 +1,73 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Prepare Build Environment
+        run: |
+          # Make Gradle wrapper executable
+          chmod +x gradlew
+
+          # Create debug.keystore if not present (since keystores are excluded by .gitignore)
+          if [ ! -f "debug.keystore" ]; then
+            echo "Generating debug keystore..."
+            keytool -genkeypair \
+              -alias androiddebugkey \
+              -keypass android \
+              -keystore debug.keystore \
+              -storepass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -validity 10000 \
+              -keyalg RSA \
+              -keysize 2048
+          fi
+
+          # Ensure .env exists by copying .env.example if missing
+          if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+            cp .env.example .env
+          fi
+
+      - name: Build Debug APK with Gradle
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
+
+      - name: Verify APK Output
+        run: |
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$APK_PATH" ]; then
+            echo "SUCCESS: APK generated at $APK_PATH"
+            ls -lh "$APK_PATH"
+          else
+            echo "ERROR: APK file not found at expected path: $APK_PATH"
+            exit 1
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: thai-cctv-live-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
